@@ -1,23 +1,44 @@
 #! /bin/sh
 
-echo "Installing tmux..."
-sudo apt install tmux -y
 
-tmux send-keys -t 1 C-b I
+HELIX_PPA="ppa:maveonair/helix-editor"
 
-echo "Installing helix..."
-sudo add-apt-repository ppa:maveonair/helix-editor
-sudo apt update
-sudo apt install helix -y
-
-echo "Installing starship prompt..."
-curl -sS https://starship.rs/install.sh | sh
-
-# Append eval "$(starship init bash)" to ~/.bashrc if it's not already present
-if ! grep -q 'eval "$(starship init bash)"' ~/.bashrc; then
-    echo 'eval "$(starship init bash)"' >> ~/.bashrc
+if ! command -v tmux >/dev/null; then
+    echo "Installing tmux..."
+    sudo apt-get install tmux -y
+else 
+    echo "tmux already installed."
 fi
 
+
+if ! grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep helix >/dev/null; then
+    echo "Adding PPA..."
+    sudo add-apt-repository ppa:maveonair/helix-editor
+    sudp apt-get update
+else 
+    echo "PPA already added."
+fi
+
+if ! command -v hx >/dev/null; then
+    echo "Installing helix..."
+    sudo apt-get install helix -y
+else 
+    echo "Helix already installed."
+fi
+
+if ! command -v starship >/dev/null; then
+    echo "Installing starship prompt..."
+    curl -sS https://starship.rs/install.sh | sh
+    # Append eval "$(starship init bash)" to ~/.bashrc if it's not already present
+    if ! grep -q 'eval "$(starship init bash)"' ~/.bashrc; then
+        echo 'eval "$(starship init bash)"' >> ~/.bashrc
+    fi
+else 
+    echo "Starship already installed."
+fi 
+
 echo "Applying themes and keybinds..."
-mv .config ~/
-mv .tmux.conf ~/
+cp -r .config ~/
+cp .tmux.conf ~/
+
+echo "Make sure to enable tmux plugins using C-b I"
